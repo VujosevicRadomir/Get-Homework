@@ -1,0 +1,10 @@
+Program je radjen u linux OS i koriscena je mysql baza. Koliko znam sve koriscene komponente su nezavisne od OS, ali sam hteo svejedno da napomenem.
+
+Aplikacija je pravljena u Java eclipse SE okruzenju i saljem vam sve fajlove koji su deo projekta. 
+Folder lib sadrzi biblioteke koje treba da se dodaju kao deo classpath.
+
+Folder SQL sadrzi fajlove sa upitima za inicijalizaciju baze. data_init.sql kreira bazu i tabele, dok test.sql ubacuje nekoliko korisnika i zadataka. Ovi korisnici imaju plain text password i sluze samo za testiranje. Ukoliko se ne koriste ovi test unosi moguce je ulogovati se kao administrator koristeci username "root" i password "."
+
+Nakon logina korisnik dobija spisak zadataka koji su dodeljeni njemu ili nisu dodeljeni nikome. Svaki zadatak se moze videti detaljnije i menjati ako se klikne na njega dva puta. Administrator uz ovo takodje moze da vidi spisak svih zadataka kao i korisnika i da stvara nove zadatke i korisnike. Kada se korisnici stvore, u bazu podataka se ubacuje password koji je hashiran pomocu md5 algoritma
+
+
