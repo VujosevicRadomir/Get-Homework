@@ -12,8 +12,7 @@ import javax.swing.JPasswordField;
 import javax.swing.JRadioButton;
 import javax.swing.JTextField;
 
-public class NewUserForm {
-	JFrame f;
+public class NewUserForm extends UI{
 	JLabel usrLabel, emailLabel, nameLabel, surnameLabel, statusLabel, errLabel, pwLabel;
 	JTextField usrTF, emailTF, nameTF, surnameTF;
 	JPasswordField pwField;
@@ -23,7 +22,6 @@ public class NewUserForm {
 	AdminUI parentUI;
 	
 	public NewUserForm(AdminUI ui) {
-		f = new JFrame();
 		f.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 		parentUI = ui;
 		
@@ -91,9 +89,9 @@ public class NewUserForm {
 				
 				User u = new User(usrTF.getText().trim(),
 								  new String(pwField.getPassword()),
-								  emailTF.getText(),
-								  nameTF.getText(),
-								  surnameTF.getText(),
+								  emailTF.getText().trim(),
+								  nameTF.getText().trim(),
+								  surnameTF.getText().trim(),
 								  status
 								  );
 				
@@ -106,8 +104,7 @@ public class NewUserForm {
 				}
 				
 				parentUI.usersModel.addElement(u);
-				f.setVisible(false);
-				f.dispose();
+				closeUI();
 			}
 		});
 		

@@ -6,6 +6,7 @@ import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
 
+import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
@@ -13,7 +14,7 @@ import java.awt.event.MouseEvent;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-public class AdminUI extends UI implements ActionListener{
+public class AdminUI extends RegUI implements ActionListener{
 	JPanel defaultPanel, tasksPanel, usersPanel;
 	JTabbedPane tp;
 	JList<Task> allTasksList;
@@ -33,12 +34,11 @@ public class AdminUI extends UI implements ActionListener{
 	AdminUI(){
 		super();
 		
-		
 		defaultPanel = new JPanel();
 		defaultPanel.setLayout(null);
 		defaultPanel.add(nameLabel); defaultPanel.add(emailLabel); defaultPanel.add(usrLabel);
 		defaultPanel.add(taskLabel); defaultPanel.add(statusLabel);
-		defaultPanel.add(taskList);
+		defaultPanel.add(taskTabs);
 		
 		tasksPanel = new JPanel();
 		tasksPanel.setLayout(null);
@@ -59,6 +59,8 @@ public class AdminUI extends UI implements ActionListener{
 		try {
 			tasksModel = new DefaultListModel<Task>();
 			allTasksList = new JList<Task>(tasksModel);
+			Font f = allTasksList.getFont();
+			allTasksList.setFont(new Font("monospaced", f.getStyle(), f.getSize() - 1));
 			
 			ResultSet rs = DatabaseHandler.getAllTasks();
 			while(rs.next()) {
@@ -97,6 +99,12 @@ public class AdminUI extends UI implements ActionListener{
 		tp.add("All users", usersPanel);
 		
 		f.add(tp);
+	}
+	
+	public void deleteTaskFromLists(Task t) {
+		super.deleteTaskFromLists(t);
+		deleteTaskFromListModel(t, tasksModel);
+		
 	}
 	
 }

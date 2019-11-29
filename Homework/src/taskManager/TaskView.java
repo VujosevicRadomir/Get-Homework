@@ -9,28 +9,30 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Vector;
 
-public class TaskView implements ActionListener {
+public class TaskView extends UI implements ActionListener {
 	Task t;
 	
-	JFrame f;
 	JTextField deadlineTF, shortnameTF, projectTF;
-	JLabel deadlineLabel, shortnameLabel, projectLabel, descriptionLabel, assignedLabel;
+	JLabel deadlineLabel, shortnameLabel, projectLabel, descriptionLabel, assignedToLabel, assignUserLabel; 
 	JTextArea descriptionTA;
-	JButton editButton;
+	JButton editButton, deleteButton;
 	JList<User> assignList;
 	JMenuItem editMI, saveMI;
 	JMenuBar mb;
 	JComboBox<User> userSelectionCB;
 	
 	TaskView(Task t){
+		f.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 		this.t = t;
-		f = new JFrame();
 		
 		saveMI = new JMenuItem("Save");
 		editMI = new JMenuItem("Edit");
 		
 		saveMI.addActionListener(this);
 		editMI.addActionListener(this);
+		if(Main.currentUser.status == User.UserStatus.Regular && t.id != Main.currentUser.id) {
+			editMI.setEnabled(false);
+		}
 		
 		saveMI.setEnabled(false);
 		
@@ -67,40 +69,60 @@ public class TaskView implements ActionListener {
 		f.add(descriptionLabel);
 		
 		descriptionTA = new JTextArea(t.description);
-		descriptionTA.setBounds(20, 200, 660,250);
+		descriptionTA.setBounds(20, 200, 660,230);
 		f.add(descriptionTA);
 		
-		assignedLabel = new JLabel("Assigned to:");
-		assignedLabel.setBounds(460, 30, 120, 20);
-		assignedLabel.setHorizontalAlignment(JLabel.RIGHT);
-		f.add(assignedLabel);		
+		assignedToLabel = new JLabel("Unassigned");
+		assignedToLabel.setBounds(450, 30, 290, 20);
+		f.add(assignedToLabel);		
 		
 		
 		try {
-			Vector<User> v = new Vector<User>();
 			ResultSet rs = DatabaseHandler.getUsersAssignedToTask(t);
-			while(rs.next()) {
-				v.add(new User(rs));
+			User assignedUser = null;
+			if(rs.next()) {
+				assignedUser = new User(rs);
+				assignedToLabel.setText("Assigned to: " + assignedUser);
 			}
 			
-			assignList = new JList<User>(v);
-			assignList.setBounds(450, 60, 200, 20);
-			f.add(assignList);
-			
 			if(Main.currentUser.status == User.UserStatus.Administrator) {
-				Vector<User> v2 = new Vector<User>();
-				v2.add(null);
+				assignUserLabel = new JLabel("Reassign task to:");
+				assignUserLabel.setBounds(450, 75, 200, 20);
+				assignUserLabel.setVisible(false);
+				f.add(assignUserLabel);
+				
+				Vector<User> v = new Vector<User>();
+				if(assignedUser != null) {
+					v.add(assignedUser);
+				}
+				v.add(null);
 				rs = DatabaseHandler.getAllUsers();
 				while(rs.next()) {
 					User u = new User(rs);
-					if(!u.equals(Main.currentUser));
-					v2.add(u);
+					if(!u.equals(assignedUser))
+						v.add(u);
 				}
-				userSelectionCB = new JComboBox<User>(v2);
+				userSelectionCB = new JComboBox<User>(v);
 				userSelectionCB.setBounds(450, 100, 200, 20);
 				userSelectionCB.setEditable(false);
 				userSelectionCB.setVisible(false);
 				f.add(userSelectionCB);
+				
+				deleteButton = new JButton("Delete Task");
+				deleteButton.setBounds(450, 150, 200, 30);
+				deleteButton.addActionListener(new ActionListener() {
+					public void actionPerformed(ActionEvent e) {
+						try {
+							DatabaseHandler.deleteTaskInDB(t);
+							Main.currentUI.deleteTaskFromLists(t);
+						} catch (SQLException e1) {
+							e1.printStackTrace();
+						}
+						closeUI();
+					}
+				});
+				f.add(deleteButton);
+				
 			}
 			
 		}catch(SQLException e) {
@@ -139,19 +161,29 @@ public class TaskView implements ActionListener {
 	
 	public void actionPerformed(ActionEvent e) {
 		if(e.getSource() == editMI) {
+			editMI.setEnabled(false);
 			setEditable(true);
 			saveMI.setEnabled(true);
 			if(Main.currentUser.status == User.UserStatus.Administrator) {
+				assignUserLabel.setVisible(true);
 				userSelectionCB.setVisible(true);
 			}
 		}else if(e.getSource() == saveMI) {
-			
+			editMI.setEnabled(true);
 			setEditable(false);
 			saveMI.setEnabled(false);
 			if(Main.currentUser.status == User.UserStatus.Administrator) {
 				userSelectionCB.setVisible(false);
+				assignUserLabel.setVisible(false);
 				User u = (User)userSelectionCB.getSelectedItem();
-				t.asignedTo = u == null ? 0 : u.id;
+				if(u ==  null) {
+					t.asignedTo = 0;
+					assignedToLabel.setText("Unassigned");
+				}else {
+					t.asignedTo = u.id;
+					assignedToLabel.setText("Assigned to: " + u);
+				}
+				
 			}
 			updateTask();
 		}

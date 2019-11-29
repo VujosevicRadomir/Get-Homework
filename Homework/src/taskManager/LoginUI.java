@@ -6,8 +6,7 @@ import java.sql.SQLException;
 
 import javax.swing.*;
 
-public class LoginUI implements ActionListener {
-	JFrame f;
+public class LoginUI extends UI implements ActionListener {
 	JLabel usrLabel, pwLabel, errLabel;
 	JTextField loginTF;
 	JPasswordField passwordPF;
@@ -15,7 +14,6 @@ public class LoginUI implements ActionListener {
 
 	
 	LoginUI(){
-		f = new JFrame();
 		f.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		
 		usrLabel = new JLabel("Username");
@@ -68,13 +66,12 @@ public class LoginUI implements ActionListener {
 		if(!result) {
 			errLabel.setText("Please check your username and password");
 		}else {
-			f.setVisible(false);
-			f.dispose();
+			closeUI();
 			if(Main.currentUser.status == User.UserStatus.Administrator) {
-				new AdminUI();
+				Main.currentUI = new AdminUI();
 			}
 			else {
-				new RegUI();
+				Main.currentUI = new RegUI();
 			}
 		}
 	}

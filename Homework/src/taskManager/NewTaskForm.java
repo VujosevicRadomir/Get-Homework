@@ -16,8 +16,8 @@ import javax.swing.JTextField;
 
 import net.sourceforge.jdatepicker.impl.*;
 
-public class NewTaskForm {
-	JFrame f;
+public class NewTaskForm extends UI implements ActionListener {
+
 	JLabel deadlineLabel, shortnameLabel, projectLabel, descriptionLabel, assignedLabel, errLabel;
 	JTextField shortnameTF, projectTF;
 	JTextArea descriptionTA;
@@ -28,7 +28,6 @@ public class NewTaskForm {
 	AdminUI parentUI;
 
 	public NewTaskForm(AdminUI ui) {
-		f = new JFrame();
 		f.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 		parentUI = ui;
 
@@ -47,7 +46,7 @@ public class NewTaskForm {
 		deadlineLabel = new JLabel("Deadline: ");
 		deadlineLabel.setBounds(20, 100, 100, 20);
 
-		model = new UtilDateModel();		
+		model = new UtilDateModel();
 		model.setDate(2020, 0, 1);
 		model.setSelected(true);
 		datePicker = new JDatePickerImpl(new JDatePanelImpl(model));
@@ -80,57 +79,50 @@ public class NewTaskForm {
 		errLabel.setBounds(20, 590, 400, 20);
 
 		confirmBtn = new JButton("Confirm");
-		confirmBtn.setBounds(50, 640, 100, 20);
-		confirmBtn.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				if (shortnameTF.getText().trim().length() == 0 || projectTF.getText().trim().length() == 0
-						|| descriptionTA.getText().trim().length() == 0) {
-					errLabel.setText("Please fill out all of the fields");
-					return;
-				}
-				User u = (User) users.getSelectedItem();
-				int assignedTo = u == null ? 0 : u.id;
-				Date deadlineDate = new Date(model.getValue().getTime());
-
-				Task t = new Task("new", deadlineDate, descriptionTA.getText(), shortnameTF.getText(),
-						projectTF.getText(), assignedTo);
-				try {
-					DatabaseHandler.insertTaskIntoDB(t);
-					parentUI.tasksModel.addElement(t);
-					f.setVisible(false);
-					f.dispose();
-				} catch (SQLException ex) {
-					errLabel.setText("Error while creating the task");
-					System.err.println(ex);
-					System.exit(1);
-				}
-			}
-		});
-
+		confirmBtn.setBounds(50, 600, 100, 20);
+		confirmBtn.addActionListener(this);
 		cancelBtn = new JButton("Cancel");
-		cancelBtn.setBounds(300, 640, 100, 20);
-		cancelBtn.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				f.setVisible(false);
-				f.dispose();
-			}
-		});
-
-		f.add(shortnameLabel);
-		f.add(projectLabel);
-		f.add(deadlineLabel);
-		f.add(descriptionLabel);
-		f.add(assignedLabel);
-		f.add(shortnameTF);
-		f.add(projectTF);
+		cancelBtn.setBounds(300, 600, 100, 20);
+		cancelBtn.addActionListener(this);
+		
+		f.add(errLabel);f.add(shortnameLabel);f.add(projectLabel);f.add(deadlineLabel);f.add(descriptionLabel);f.add(assignedLabel);
+		f.add(shortnameTF);f.add(projectTF);
 		f.add(descriptionTA);
 		f.add(datePicker);
-		f.add(confirmBtn);
-		f.add(cancelBtn);
-		f.add(errLabel);
+		f.add(confirmBtn);f.add(cancelBtn);
+		
 
 		f.setLayout(null);
-		f.setSize(500, 750);
+		f.setSize(500, 670);
 		f.setVisible(true);
+	}
+	
+	public void actionPerformed(ActionEvent e) {
+		if(e.getSource() == cancelBtn) {
+			closeUI();
+			return;
+		}
+		else {
+			if (shortnameTF.getText().trim().length() == 0 || projectTF.getText().trim().length() == 0
+					|| descriptionTA.getText().trim().length() == 0) {
+				errLabel.setText("Please fill out all of the fields");
+				return;
+			}
+			User u = (User) users.getSelectedItem();
+			int assignedTo = u == null ? 0 : u.id;
+			Date deadlineDate = new Date(model.getValue().getTime());
+	
+			Task t = new Task("new", deadlineDate, descriptionTA.getText().trim(),
+						shortnameTF.getText().trim() ,projectTF.getText().trim() , assignedTo);
+			try {
+				DatabaseHandler.insertTaskIntoDB(t);
+				parentUI.tasksModel.addElement(t);
+				closeUI();
+			} catch (SQLException ex) {
+				errLabel.setText("Error while creating the task");
+				System.err.println(ex);
+				System.exit(1);
+			}
+		}
 	}
 }

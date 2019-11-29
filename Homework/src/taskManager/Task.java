@@ -57,6 +57,11 @@ public class Task {
 	
 	
 	public String toString() {
-		return shortname + " deadline: " + deadline + " part of project: " + project;
+		return String.format("%-20s deadline: %s    project: %-20s", shortname, deadline, project); 
+	}
+	
+	public boolean equals(Task t) {
+		if(t == null) return false;
+		return id == t.id;
 	}
 }

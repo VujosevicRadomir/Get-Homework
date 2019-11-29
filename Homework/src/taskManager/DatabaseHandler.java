@@ -36,8 +36,6 @@ public class DatabaseHandler {
 			}
 			String pwInDB = rs.getString("pw");
 			
-			System.out.println(pwInDB);
-			System.out.println(encryptedPassword(pw));
 			if(!encryptedPassword(pw).equals(pwInDB) 
 					&& !pw.equals(pwInDB)//exists only for testing purposes -
 											//it lets us write an sql query to add users with a plain text pw							
@@ -67,7 +65,12 @@ public class DatabaseHandler {
 	}
 	
 	public static ResultSet getTasksAssignedToUser(User u) throws SQLException{
-		String query = "select * from user_tasks.tasks where asignedTo is null or asignedTo=" + u.id;
+		String query = "select * from user_tasks.tasks where asignedTo=" + u.id;
+		ResultSet rs = cnt.createStatement().executeQuery(query);
+		return rs;
+	}
+	public static ResultSet getUnassignedTasks() throws SQLException{
+		String query = "select * from user_tasks.tasks where asignedTo is null;";
 		ResultSet rs = cnt.createStatement().executeQuery(query);
 		return rs;
 	}
@@ -156,5 +159,10 @@ public class DatabaseHandler {
 			System.exit(1);
 			return null;
 		}
+	}
+	
+	public static void deleteTaskInDB(Task t) throws SQLException{
+		String query = "delete from tasks where taskid=" + t.id + ";";
+		cnt.createStatement().executeUpdate(query);
 	}
 }

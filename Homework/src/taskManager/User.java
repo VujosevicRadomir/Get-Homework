@@ -53,6 +53,7 @@ public class User {
 	}
 	
 	public boolean equals(User u) {
+		if(u == null) return false;
 		return id == u.id;
 	}
 	
